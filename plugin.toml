@@ -1,0 +1,194 @@
+# Music Search — search YouTube, SoundCloud, or local files and play audio in
+# the background with mpv. Ported from the legacy v4 plugin of the same name
+# (https://github.com/noctalia-dev/legacy-v4-plugins/tree/main/music-search).
+#
+# Architecture: the [[service]] owns every musicctl.sh subprocess and publishes
+# playback/library/queue snapshots to noctalia.state; the /music launcher and the
+# bar widget are thin consumers that dispatch actions back through the service.
+
+id = "kevichi7/music-search"
+name = "Music Search"
+version = "1.2.6"
+plugin_api = 3
+author = "kevichi7"
+license = "MIT"
+icon = "music"
+description = "Search YouTube, SoundCloud, or local files and play audio in the background with mpv."
+tags = ["launcher", "bar", "service", "music", "audio", "utility"]
+# mpv-ipc.sh shells out to socat when present and falls back to python3;
+# ffmpeg is only needed for mp3 downloads.
+dependencies = ["bash", "mpv", "yt-dlp", "jq", "socat", "python3", "ffmpeg"]
+
+[[service]]
+id = "svc"
+entry = "service.luau"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "launcher.luau"
+prefix = "music"
+glyph = "music"
+include_in_global_search = false
+debounce_ms = 250
+
+[[widget]]
+id = "music"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "show_title"
+  type = "bool"
+  label_key = "settings.show_title.label"
+  description_key = "settings.show_title.description"
+  default = true
+
+[[panel]]
+id = "player"
+entry = "panel.luau"
+width = 420
+height = 380
+placement = "floating"
+
+# ── Playback and library behavior (synced to the backend by the service) ─────
+
+[[setting]]
+key = "provider"
+type = "select"
+label_key = "settings.provider.label"
+description_key = "settings.provider.description"
+default = "youtube"
+options = [
+  { value = "youtube", label_key = "providers.youtube" },
+  { value = "soundcloud", label_key = "providers.soundcloud" },
+  { value = "local", label_key = "providers.local" },
+]
+
+[[setting]]
+key = "sort_by"
+type = "select"
+label_key = "settings.sort_by.label"
+description_key = "settings.sort_by.description"
+default = "date"
+options = [
+  { value = "date", label_key = "sort.date" },
+  { value = "title", label_key = "sort.title" },
+  { value = "duration", label_key = "sort.duration" },
+  { value = "rating", label_key = "sort.rating" },
+]
+
+[[setting]]
+key = "yt_player_client"
+type = "select"
+label_key = "settings.yt_player_client.label"
+description_key = "settings.yt_player_client.description"
+default = "web_embedded"
+options = [
+  { value = "android", label_key = "settings.yt_player_client.android" },
+  { value = "web", label_key = "settings.yt_player_client.web" },
+  { value = "web_embedded", label_key = "settings.yt_player_client.web_embedded" },
+  { value = "default", label_key = "settings.yt_player_client.default" },
+]
+
+[[setting]]
+key = "download_directory"
+type = "folder"
+label_key = "settings.download_directory.label"
+description_key = "settings.download_directory.description"
+default = "~/Music/Noctalia"
+
+[[setting]]
+key = "download_cache_max_mb"
+type = "int"
+label_key = "settings.download_cache_max_mb.label"
+description_key = "settings.download_cache_max_mb.description"
+default = 0
+min = 0
+max = 100000
+
+[[setting]]
+key = "auto_save_mp3"
+type = "bool"
+label_key = "settings.auto_save_mp3.label"
+description_key = "settings.auto_save_mp3.description"
+default = false
+
+# ── Launcher presentation ────────────────────────────────────────────────────
+
+[[setting]]
+key = "max_results"
+type = "int"
+label_key = "settings.max_results.label"
+description_key = "settings.max_results.description"
+default = 8
+min = 1
+max = 30
+
+[[setting]]
+key = "show_home_recent"
+type = "bool"
+label_key = "settings.show_home_recent.label"
+description_key = "settings.show_home_recent.description"
+default = true
+
+[[setting]]
+key = "show_home_top"
+type = "bool"
+label_key = "settings.show_home_top.label"
+description_key = "settings.show_home_top.description"
+default = true
+
+[[setting]]
+key = "show_home_tags"
+type = "bool"
+label_key = "settings.show_home_tags.label"
+description_key = "settings.show_home_tags.description"
+default = true
+
+[[setting]]
+key = "show_home_artists"
+type = "bool"
+label_key = "settings.show_home_artists.label"
+description_key = "settings.show_home_artists.description"
+default = true
+
+[[setting]]
+key = "show_home_playlists"
+type = "bool"
+label_key = "settings.show_home_playlists.label"
+description_key = "settings.show_home_playlists.description"
+default = true
+
+[[setting]]
+key = "show_uploader"
+type = "bool"
+label_key = "settings.show_uploader.label"
+description_key = "settings.show_uploader.description"
+default = true
+
+[[setting]]
+key = "show_duration"
+type = "bool"
+label_key = "settings.show_duration.label"
+description_key = "settings.show_duration.description"
+default = true
+
+[[setting]]
+key = "show_rating"
+type = "bool"
+label_key = "settings.show_rating.label"
+description_key = "settings.show_rating.description"
+default = true
+
+[[setting]]
+key = "show_tags"
+type = "bool"
+label_key = "settings.show_tags.label"
+description_key = "settings.show_tags.description"
+default = true
+
+[[setting]]
+key = "show_play_stats"
+type = "bool"
+label_key = "settings.show_play_stats.label"
+description_key = "settings.show_play_stats.description"
+default = true

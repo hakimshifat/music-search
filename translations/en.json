@@ -1,0 +1,378 @@
+{
+  "actions": {
+    "already_stopped": "Music is already stopped",
+    "stop_music": "Stop music",
+    "stop_title": "Stop",
+    "stop_desc": "Stop current playback",
+    "play_url": "Play URL",
+    "save_url": "Save URL to library",
+    "save_url_mp3": "Save URL as mp3",
+    "download_desc": "Save as mp3",
+    "download_current_mp3": "Save current track as mp3",
+    "download_current_mp3_desc": "Save the currently playing track as an mp3 file"
+  },
+  "artists": {
+    "no_artists": "No artists yet",
+    "no_match": "No artists match"
+  },
+  "bar_widget": {
+    "tooltip_idle": "Not playing",
+    "tooltip_playing": "Now playing: {title}",
+    "click_hint": "Left click: open player · right click: stop"
+  },
+  "common": {
+    "untitled": "Untitled",
+    "custom_url": "Custom URL",
+    "downloaded_track": "Downloaded track",
+    "queued_url": "Queued URL",
+    "music": "Music",
+    "one_play": "1 play",
+    "plays": "{count} plays",
+    "rating_stars": "★{rating}/5"
+  },
+  "errors": {
+    "last_error": "Last error: {error}",
+    "playback_failed": "music-search playback command failed.",
+    "search_malformed": "Search results were malformed.",
+    "search_failed": "Search failed.",
+    "search_failed_default": "Search failed — is yt-dlp installed?",
+    "seek_malformed": "Position value was malformed.",
+    "seek_failed": "music-search seek command failed.",
+    "speed_failed": "music-search speed command failed.",
+    "library_failed": "music-search library command failed.",
+    "queue_failed": "music-search queue command failed.",
+    "queue_playlist_track_failed": "music-search couldn't resolve the playlist track.",
+    "queue_action_failed": "music-search queue action failed.",
+    "mp3_save_failed": "music-search mp3 save command failed.",
+    "folder_import_failed": "music-search folder import command failed."
+  },
+  "home": {
+    "recently_played": "Recently played",
+    "recently_played_desc": "Your most recently played tracks",
+    "most_played": "Most played",
+    "most_played_desc": "Your most played tracks",
+    "tags": "Tags",
+    "tags_desc": "Browse your tags",
+    "artists": "Artists",
+    "artists_desc": "Browse your artists",
+    "playlists": "Playlists",
+    "playlists_desc": "Browse your playlists",
+    "recent": "Recent",
+    "recent_with_time": "Recent — {time}",
+    "top": "Top",
+    "top_with_plays": "Top — {plays}",
+    "artist": "Artist",
+    "artist_with_time": "Artist — {time}"
+  },
+  "import": {
+    "title": "Import folder",
+    "desc": "Import a local music folder",
+    "create_playlist": "Create a playlist for this folder?",
+    "hint": "Import music folder into library"
+  },
+  "library": {
+    "label": "Library",
+    "empty": "Library is empty",
+    "empty_desc": "Save tracks from search results to grow your library",
+    "saved": "Saved",
+    "playlist_only": "Only in playlist",
+    "saved_tracks": "Saved tracks",
+    "no_matches": "No library tracks match",
+    "no_filter_matches": "No library tracks match this filter",
+    "no_tagged": "No tracks tagged",
+    "one_track": "1 track",
+    "track_count": "{count} tracks",
+    "library_empty": "Library is empty",
+    "saved_empty": "No saved tracks"
+  },
+  "metadata": {
+    "title_field": "Title",
+    "artist_field": "Artist",
+    "album_field": "Album",
+    "label": "Metadata",
+    "edit": "Edit metadata",
+    "choose_track": "Choose a track",
+    "field_editor": "Metadata field editor",
+    "header_description": "Edit track metadata",
+    "currently_empty": "Currently empty",
+    "edit_field": "Edit {field}",
+    "empty": "Set a value",
+    "set_field": "Set {field} to {value}",
+    "clear_field": "Clear {field}",
+    "clear_value": "Clear value",
+    "choose_field": "Choose a field",
+    "album_hint": "Album",
+    "type_new": "Type the new value"
+  },
+  "notices": {
+    "library_updated": "Library updated",
+    "playlists_updated": "Playlists updated",
+    "saved_mp3": "Track saved as mp3",
+    "saved_mp3_to": "Track saved as mp3 in {folder}",
+    "added_to_queue": "Track added to queue",
+    "folder_imported": "Folder imported",
+    "importing_folder": "Importing folder...",
+    "syncing_folder": "Syncing folder...",
+    "saving_mp3": "Saving track as mp3...",
+    "download_folder_updated": "Download folder updated",
+    "cache_limit_updated": "Cache limit updated",
+    "playlist_empty": "Playlist is empty",
+    "switched_to": "Switched to {provider}",
+    "yt_client_set": "YouTube player client set to {client}",
+    "sort_set": "Sort set to {sort}",
+    "added_playlist_to_queue": "Added playlist to queue",
+    "added_shuffled_playlist_to_queue": "Added shuffled playlist to queue",
+    "playing_playlist": "Playing playlist",
+    "playing_shuffled_playlist": "Playing shuffled playlist",
+    "stopped": "Playback stopped",
+    "paused": "Playback paused",
+    "resumed": "Playback resumed",
+    "stuck_detected": "Playback commands appear stuck. If controls stop responding, re-enable the plugin (noctalia msg plugins disable + enable)."
+  },
+  "panel": {
+    "title": "Music Player",
+    "no_track": "Nothing playing",
+    "search_placeholder": "Search music...",
+    "prev_track": "Previous track",
+    "toggle_play": "Play / pause",
+    "next_track": "Next track (or related song)"
+  },
+  "playlists": {
+    "none": "No playlists yet",
+    "create_hint": "Create a playlist to organize your library",
+    "untitled": "Untitled",
+    "one_track": "1 track",
+    "track_count": "{count} tracks",
+    "synced_folder": "Synced to folder",
+    "synced_folder_description": "This playlist stays in sync with a folder",
+    "rename": "Rename playlist",
+    "delete": "Delete playlist",
+    "rename_title": "Rename playlist",
+    "type_new_name": "Type a new name",
+    "type_different": "Type a different name",
+    "already_exists": "A playlist with this name already exists",
+    "rename_to": "Rename to {name}",
+    "update_title": "Update title",
+    "create": "Create playlist",
+    "create_and_add": "Create playlist and add track",
+    "add_after_create": "Add track after creating",
+    "create_new": "Create new playlist",
+    "add_to": "Add to playlist",
+    "choose": "Choose a playlist",
+    "choose_for": "Choose a playlist for",
+    "choose_first": "Create or choose a playlist"
+  },
+  "plugin": {
+    "name": "Music Search"
+  },
+  "providers": {
+    "youtube": "YouTube",
+    "soundcloud": "SoundCloud",
+    "local": "Local"
+  },
+  "queue": {
+    "title": "Queue",
+    "next_up": "Next up",
+    "queued": "Queued",
+    "active": "Active",
+    "idle": "Idle",
+    "track_count": "{count} tracks",
+    "start": "Start queue",
+    "start_now": "Start queue now",
+    "start_arm": "Arm queue for when playback stops",
+    "stop": "Stop queue",
+    "stop_pause": "Stop queue — pause playback",
+    "stop_keep": "Stop queue — keep playing",
+    "skip": "Skip",
+    "skip_now": "Skip to next",
+    "skip_jump": "Skip current track",
+    "clear": "Clear queue",
+    "clear_remove": "Clear queue — remove all queued tracks",
+    "clear_empty": "Clear queue — empty it",
+    "autoplay_saved": "Autoplay saved",
+    "autoplay_saved_desc": "Play all saved tracks when playback stops",
+    "autoplay_saved_active_desc": "Stop queue to disable autoplay",
+    "autoplay_saved_shuffle": "Autoplay saved (shuffle)",
+    "autoplay_saved_shuffle_desc": "Play all saved tracks shuffled when playback stops",
+    "autoplay_saved_shuffle_active_desc": "Stop queue to disable autoplay",
+    "empty": "Queue is empty",
+    "empty_desc": "Add tracks from search results",
+    "removed": "Track removed from queue",
+    "cleared": "Queue cleared",
+    "playing_saved": "Playing saved tracks",
+    "playing_shuffled_saved": "Playing saved tracks (shuffle)",
+    "loaded": "Queue loaded",
+    "loaded_empty": "Nothing to queue — library is empty",
+    "armed": "Queue armed — will start when playback stops",
+    "stopped": "Queue stopped",
+    "no_next": "Nothing next in queue",
+    "loading_saved": "Loading saved tracks...",
+    "loading_shuffled_saved": "Loading saved tracks (shuffle)...",
+    "now_playing": "Now playing",
+    "error_exhausted": "Queue exhausted",
+    "finished": "Playback finished"
+  },
+  "radio": {
+    "loading": "Loading related tracks...",
+    "no_related": "No related tracks found",
+    "no_track": "Nothing playing — play something first",
+    "no_prev": "No previous track",
+    "ended": "End of related tracks"
+  },
+  "search": {
+    "searching": "Searching...",
+    "failed": "Search failed.",
+    "failed_default": "Search failed — is yt-dlp installed?",
+    "hint": "Search YouTube, SoundCloud, or your local music library.",
+    "no_results": "No results found.",
+    "type_more": "Type at least {count} characters to search."
+  },
+  "settings": {
+    "show_title": {
+      "label": "Show track title",
+      "description": "Show the current track title in the bar (truncated on small bars)"
+    },
+    "provider": {
+      "label": "Default search provider",
+      "description": "Provider used when no prefix (yt:, sc:, local:) is typed",
+      "android": "Android",
+      "web": "Web",
+      "default": "Default"
+    },
+    "sort_by": {
+      "label": "Sort order",
+      "description": "Default sort order for library and playlists"
+    },
+    "yt_player_client": {
+      "label": "YouTube player client",
+      "description": "Client yt-dlp uses to play YouTube tracks (web_embedded gives the best audio quality; falls back to tv/web/android when blocked)",
+      "android": "Android",
+      "web": "Web",
+      "web_embedded": "Web (embedded)",
+      "default": "Default"
+    },
+    "download_directory": {
+      "label": "Download directory",
+      "description": "Folder where mp3 downloads are saved"
+    },
+    "download_cache_max_mb": {
+      "label": "Download cache limit (MB)",
+      "description": "0 = unlimited; old downloaded mp3s are deleted first to stay under the limit"
+    },
+    "auto_save_mp3": {
+      "label": "Auto-save mp3",
+      "description": "Automatically save the current track as mp3 when playback starts"
+    },
+    "max_results": {
+      "label": "Max search results",
+      "description": "Maximum number of results per search"
+    },
+    "show_home_recent": {
+      "label": "Show recently played",
+      "description": "Show recently played tracks on the launcher home"
+    },
+    "show_home_top": {
+      "label": "Show most played",
+      "description": "Show most played tracks on the launcher home"
+    },
+    "show_home_tags": {
+      "label": "Show tags",
+      "description": "Show tags on the launcher home"
+    },
+    "show_home_artists": {
+      "label": "Show artists",
+      "description": "Show artists on the launcher home"
+    },
+    "show_home_playlists": {
+      "label": "Show playlists",
+      "description": "Show playlists on the launcher home"
+    },
+    "show_uploader": {
+      "label": "Show uploader",
+      "description": "Show the uploader in search results and the library"
+    },
+    "show_duration": {
+      "label": "Show duration",
+      "description": "Show the duration in search results and the library"
+    },
+    "show_rating": {
+      "label": "Show rating",
+      "description": "Show the rating in search results and the library"
+    },
+    "show_tags": {
+      "label": "Show tags",
+      "description": "Show tags in search results and the library"
+    },
+    "show_play_stats": {
+      "label": "Show play stats",
+      "description": "Show play counts in the library"
+    }
+  },
+  "sort": {
+    "date": "Date",
+    "title": "Title",
+    "duration": "Duration",
+    "rating": "Rating"
+  },
+  "speed": {
+    "title": "Playback speed",
+    "set_to": "Playback speed set to {speed}",
+    "desc": "Speed up or slow down playback",
+    "current": "Current speed: {speed}",
+    "multiplier": "Set speed multiplier",
+    "no_playback": "No playback to change speed of",
+    "use_number": "Enter a multiplier like 1.25 or 0.8"
+  },
+  "status": {
+    "starting": "Starting playback",
+    "now_playing": "Now playing",
+    "ready": "music-search ready",
+    "background_playback": "Background audio playback with mpv",
+    "search_prompt": "Search music or type a command",
+    "starting_provider_playback": "Starting {provider} playback...",
+    "connecting_youtube": "Connecting to YouTube...",
+    "connecting_soundcloud": "Connecting to SoundCloud...",
+    "opening_local": "Opening local track...",
+    "starting_playback": "Starting playback..."
+  },
+  "tags": {
+    "manage": "Manage tags",
+    "no_tags": "No tags yet",
+    "one_tag": "1 tag",
+    "tag_count": "{count} tags",
+    "header_description": "Add, remove, and browse tags",
+    "editor": "Tag editor",
+    "choose_track": "Choose a track",
+    "add": "Add tag",
+    "remove": "Remove tag",
+    "apply_to": "Apply tag to",
+    "remove_from": "Remove tag from",
+    "no_match": "No tags match",
+    "hint": "Enter a tag name"
+  },
+  "time": {
+    "just_now": "just now",
+    "minutes_ago": "{count} min ago",
+    "hours_ago": "{count} h ago",
+    "days_ago": "{count} d ago",
+    "weeks_ago": "{count} w ago"
+  },
+  "tooltip": {
+    "add_to_queue": "Add to queue",
+    "play_now": "Play now",
+    "save_to_library": "Save to library",
+    "save_mp3_current": "Save current track as mp3",
+    "resume": "Resume playback",
+    "pause": "Pause playback",
+    "remove_from_queue": "Remove from queue",
+    "remove_from_library": "Remove from library",
+    "rate": "Rate: {rating}",
+    "unrated": "Unrated",
+    "save_current_mp3": "Save current track as mp3",
+    "start_mp3_save": "Start mp3 save",
+    "remove_track": "Remove from library",
+    "download_mp3": "Save as mp3",
+    "save_now_playing_mp3": "Save now playing as mp3",
+    "download_completed": "Download completed"
+  }
+}
