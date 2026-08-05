@@ -1111,6 +1111,8 @@ function onConfigChanged()
   applyConfig()
 end
 
+noctalia.setUpdateInterval(1000)
+
 function update()
   if not ready then return end
   tick = tick + 1

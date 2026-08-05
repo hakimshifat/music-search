@@ -45,8 +45,8 @@ entry = "widget.luau"
 [[panel]]
 id = "player"
 entry = "panel.luau"
-width = 420
-height = 380
+width = 560
+height = 640
 placement = "floating"
 
 # ── Playback and library behavior (synced to the backend by the service) ─────
