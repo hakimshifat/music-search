@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 # launch.sh — mpv launch helpers
 
+mpris_script() {
+  local path=""
+  for path in \
+    /usr/share/mpv/scripts/mpris.so \
+    /usr/local/share/mpv/scripts/mpris.so \
+    /usr/lib/mpv/scripts/mpris.so \
+    /usr/lib64/mpv/scripts/mpris.so; do
+    if [[ -f "$path" ]]; then
+      printf '%s\n' "$path"
+      return 0
+    fi
+  done
+  return 1
+}
+
 launch_youtube_stream() {
   local source_url="$1"
   local speed="${2-1}"
@@ -14,6 +29,7 @@ launch_youtube_stream() {
     --ytdl-format=bestaudio[acodec=opus]/bestaudio/best/best
     --demuxer-max-bytes=256K
     --speed="$speed"
+    --volume="$(current_volume)"
     --log-file="$LOG_FILE"
     --input-ipc-server="$SOCKET_FILE"
     --title="Noctalia music-search"
@@ -21,6 +37,10 @@ launch_youtube_stream() {
   local raw_opt
   raw_opt="$(yt_mpv_raw_option "$client_override")"
   [[ -n "$raw_opt" ]] && mpv_cmd+=("$raw_opt")
+  local mp
+  if mp="$(mpris_script)"; then
+    mpv_cmd+=("--script=$mp")
+  fi
   mpv_cmd+=("$source_url")
 
   nohup setsid "${mpv_cmd[@]}" >/dev/null 2>&1 &
@@ -32,6 +52,8 @@ launch_youtube_cached() {
   local client_override="${3-}"
   local extractor_arg
   extractor_arg="$(yt_extractor_args "$client_override")"
+  local mp=""
+  mp="$(mpris_script || true)"
 
   nohup setsid bash -lc '
     set -euo pipefail
@@ -44,8 +66,10 @@ launch_youtube_cached() {
     if [[ ${#files[@]} -eq 0 ]]; then
       exit 1
     fi
-    exec mpv --no-video --force-window=no --audio-display=no --demuxer-max-bytes=256K --speed="$6" --log-file="$4" --input-ipc-server="$3" --title="Noctalia music-search" "${files[0]}"
-  ' _ "$source_url" "$DOWNLOAD_BASENAME" "$SOCKET_FILE" "$LOG_FILE" "$extractor_arg" "$speed" >/dev/null 2>&1 &
+    mpris_flag=""
+    [[ -n "$8" ]] && mpris_flag="--script=$8"
+    exec mpv --no-video --force-window=no --audio-display=no --demuxer-max-bytes=256K --speed="$6" --volume="$7" --log-file="$4" --input-ipc-server="$3" --title="Noctalia music-search" $mpris_flag "${files[0]}"
+  ' _ "$source_url" "$DOWNLOAD_BASENAME" "$SOCKET_FILE" "$LOG_FILE" "$extractor_arg" "$speed" "$(current_volume)" "$mp" >/dev/null 2>&1 &
 }
 
 wait_for_audio_start() {

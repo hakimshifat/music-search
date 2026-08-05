@@ -17,6 +17,18 @@ local searchFailed = false
 local pendingSearchQuery = nil
 local lastCompletedQuery = ""
 local dragTarget = nil
+local volumeDrag = nil
+
+local repeatOrder = { "off", "all", "one" }
+
+local function nextRepeatMode(mode)
+  for i, m in ipairs(repeatOrder) do
+    if m == mode then
+      return repeatOrder[(i % #repeatOrder) + 1]
+    end
+  end
+  return "all"
+end
 
 local trCache = {}
 
@@ -231,6 +243,43 @@ render = function()
         ui.button({ glyph = "media-next", tooltip = tr("panel.next_track"), onClick = function()
           dispatch({ action = "next" })
         end }),
+        ui.button({
+          glyph = (snapshot or {})["repeat"] == "one" and "repeat-one" or "repeat",
+          tooltip = tr("panel.repeat", { mode = tr("repeat." .. ((snapshot or {})["repeat"] or "off")) }),
+          onClick = function()
+            dispatch({ action = "repeat", payload = { mode = nextRepeatMode((snapshot or {})["repeat"] or "off") } })
+          end,
+        }),
+        ui.button({
+          glyph = "shuffle",
+          tooltip = tr("panel.shuffle", { state = (snapshot or {}).shuffle == true and tr("shuffle.on") or tr("shuffle.off") }),
+          onClick = function()
+            dispatch({ action = "shuffle", payload = { value = not ((snapshot or {}).shuffle == true) } })
+          end,
+        }),
+      })
+      local volume = math.max(0, math.min(100, math.floor(tonumber((snapshot or {}).volume) or 100)))
+      local volumeDraw = volumeDrag or volume
+      children[#children + 1] = ui.row({ gap = 8, align = "center" }, {
+        ui.button({ glyph = volume == 0 and "volume-off" or "volume-up", tooltip = tr("panel.mute"), onClick = function()
+          dispatch({ action = "volume", payload = { value = volume > 0 and 0 or 100 } })
+        end }),
+        ui.slider({
+          min = 0,
+          max = 100,
+          step = 1,
+          value = volumeDraw,
+          flexGrow = 1,
+          onChange = function(value)
+            volumeDrag = tonumber(value) or 0
+          end,
+          onDragEnd = function()
+            local target = volumeDrag or volume
+            volumeDrag = nil
+            dispatch({ action = "volume", payload = { value = math.max(0, math.min(100, math.floor(target))) } })
+          end,
+        }),
+        ui.label({ text = tostring(volumeDraw) .. "%", width = 36 }),
       })
     else
       children[#children + 1] = ui.label({ text = tr("panel.no_track") })

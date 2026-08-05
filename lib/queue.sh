@@ -144,3 +144,16 @@ _queue_peek_unlocked() {
 queue_peek() {
   with_lock "$QUEUE_LOCK" _queue_peek_unlocked
 }
+
+_queue_shuffle_unlocked() {
+  safe_read_json "$QUEUE_FILE"
+  if [[ -s "$QUEUE_FILE" ]]; then
+    require_cmd shuf
+    jq -c '.[]' "$QUEUE_FILE" 2>/dev/null | shuf | jq -s '.' | json_write_raw "$QUEUE_FILE"
+  fi
+  _list_queue_unlocked
+}
+
+queue_shuffle() {
+  with_lock "$QUEUE_LOCK" _queue_shuffle_unlocked
+}

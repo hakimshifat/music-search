@@ -5,8 +5,8 @@
 [[plugin]]
 id = "kevichi7/music-search"
 name = "Music Search"
-version = "1.2.6"
-updated_at = 1785715200
+version = "1.2.7"
+updated_at = 1785952864
 added_at = 1785715200
 author = "kevichi7"
 license = "MIT"

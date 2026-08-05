@@ -126,6 +126,18 @@ yt_client_chain() {
   esac
 }
 
+current_volume() {
+  if [[ -f "$SETTINGS_FILE" ]]; then
+    local volume
+    volume="$(jq -r '(.volume // 100) | tonumber? // 100' "$SETTINGS_FILE" 2>/dev/null || true)"
+    if [[ "$volume" =~ ^[0-9]+$ ]]; then
+      printf '%s\n' "$volume"
+      return 0
+    fi
+  fi
+  printf '100\n'
+}
+
 yt_extractor_args() {
   local chain
   chain="$(yt_client_chain "${1-}")"
@@ -194,7 +206,10 @@ ensure_files() {
     --arg sortBy "date" \
     --arg downloadDirectory "$DOWNLOADS_DIR_DEFAULT" \
     --argjson downloadCacheMaxMb 0 \
-    '{activeProvider:$provider,sortBy:$sortBy,downloadDirectory:$downloadDirectory,downloadCacheMaxMb:$downloadCacheMaxMb}' > "$SETTINGS_FILE"
+    --argjson volume 100 \
+    --arg repeatMode "off" \
+    --argjson shuffle false \
+    '{activeProvider:$provider,sortBy:$sortBy,downloadDirectory:$downloadDirectory,downloadCacheMaxMb:$downloadCacheMaxMb,volume:$volume,repeatMode:$repeatMode,shuffle:$shuffle}' > "$SETTINGS_FILE"
   [[ -f "$PLAYLISTS_FILE" ]] || printf '[]\n' > "$PLAYLISTS_FILE"
   [[ -f "$QUEUE_FILE" ]] || printf '[]\n' > "$QUEUE_FILE"
 }

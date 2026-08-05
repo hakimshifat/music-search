@@ -113,6 +113,15 @@ case "$command" in
   set-yt-player-client)
     set_yt_player_client "${1-web_embedded}"
     ;;
+  set-volume)
+    set_volume "${1-100}"
+    ;;
+  set-repeat)
+    set_repeat "${1-off}"
+    ;;
+  set-shuffle)
+    set_shuffle "${1-false}"
+    ;;
   create-playlist)
     create_playlist "${1-}"
     ;;
@@ -148,6 +157,9 @@ case "$command" in
     ;;
   queue-peek)
     queue_peek
+    ;;
+  queue-shuffle)
+    queue_shuffle
     ;;
   *)
     die "Unknown command: $command"

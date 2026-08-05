@@ -66,7 +66,9 @@ player panel. When no track is playing it shows an idle music icon.
 The `player` panel shows the current track title, its thumbnail, a seekbar,
 and previous/play-pause/next buttons. The next button skips the queued track,
 or plays a related song (YouTube radio) when nothing is queued; the previous
-button steps back through recently played tracks. The search box on top looks
+button steps back through recently played tracks. The transport row also has
+repeat (off/all/one) and shuffle toggles, and a volume slider (0–100, persisted
+between sessions) with a mute toggle. The search box on top looks
 up tracks directly from the panel: type to search, click a result (or press
 Enter for the top hit) to play it; clearing the box returns to the current
 track:
@@ -111,6 +113,9 @@ noctalia msg plugin kevichi7/music-search:svc all pause
 noctalia msg plugin kevichi7/music-search:svc all resume
 noctalia msg plugin kevichi7/music-search:svc all seek '123.5'
 noctalia msg plugin kevichi7/music-search:svc all speed '1.25'
+noctalia msg plugin kevichi7/music-search:svc all volume '70'
+noctalia msg plugin kevichi7/music-search:svc all repeat 'one'    # off | all | one
+noctalia msg plugin kevichi7/music-search:svc all shuffle 'true'  # shuffles the current queue
 noctalia msg plugin kevichi7/music-search:svc all save '<url>'            # or save_url '<url>'
 noctalia msg plugin kevichi7/music-search:svc all refresh
 ```
@@ -127,6 +132,16 @@ plain URL string or a JSON entry table (the string form matches the legacy v4
   v4 plugin. It writes state to `~/.cache/noctalia/plugins/music-search/`
   (`state.json`, `library.json`, `playlists.json`, `queue.json`,
   `settings.json`, `mpv.pid`, `mpv.sock`, `mpv.log`).
+- Volume, repeat mode, and shuffle are persisted in `settings.json` and
+  applied to every new mpv launch; volume changes also update a running mpv
+  through its IPC socket.
+- Repeat one re-plays the finished track (queue does not advance); repeat all
+  moves the finished track to the back of the queue; shuffle reorders the
+  current queue in place.
+- A notification is shown whenever a new track starts. When mpv ships its
+  MPRIS script (`/usr/share/mpv/scripts/mpris.so` on most distros), it is
+  loaded automatically so media keys and Noctalia's built-in media widget
+  work with this player.
 - mp3 downloads go to `download_directory` (default `~/Music/Noctalia`);
   downloaded YouTube tracks are reused as the local playback source for
   subsequent plays to avoid re-streaming.

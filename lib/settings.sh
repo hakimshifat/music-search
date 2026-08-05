@@ -320,3 +320,87 @@ _set_yt_player_client_unlocked() {
 set_yt_player_client() {
   with_lock "$SETTINGS_LOCK" _set_yt_player_client_unlocked "$@"
 }
+
+_set_volume_unlocked() {
+  local volume="${1-100}"
+  require_cmd jq
+
+  if [[ ! "$volume" =~ ^[0-9]+$ ]] || (( volume < 0 || volume > 100 )); then
+    die "Volume must be an integer from 0 to 100."
+  fi
+
+  safe_read_json "$SETTINGS_FILE"
+
+  if [[ -f "$SETTINGS_FILE" ]]; then
+    jq --argjson v "$volume" '.volume = $v' "$SETTINGS_FILE" \
+      | json_write_raw "$SETTINGS_FILE"
+  else
+    jq -nc --argjson v "$volume" '{volume: $v}' \
+      | json_write_raw "$SETTINGS_FILE"
+  fi
+
+  if [[ -S "$SOCKET_FILE" ]]; then
+    mpv_ipc_send "$(jq -cn --argjson volume "$volume" \
+      '{"command":["set_property","volume",$volume]}')" >/dev/null 2>&1 || true
+  fi
+
+  cat "$SETTINGS_FILE"
+}
+
+set_volume() {
+  with_lock "$SETTINGS_LOCK" _set_volume_unlocked "$@"
+}
+
+_set_repeat_unlocked() {
+  local mode="${1-off}"
+  require_cmd jq
+
+  case "$mode" in
+    off|all|one) ;;
+    *)
+      die "Unknown repeat mode: $mode. Valid: off, all, one"
+      ;;
+  esac
+
+  safe_read_json "$SETTINGS_FILE"
+
+  if [[ -f "$SETTINGS_FILE" ]]; then
+    jq --arg m "$mode" '.repeatMode = $m' "$SETTINGS_FILE" \
+      | json_write_raw "$SETTINGS_FILE"
+  else
+    jq -nc --arg m "$mode" '{repeatMode: $m}' \
+      | json_write_raw "$SETTINGS_FILE"
+  fi
+  cat "$SETTINGS_FILE"
+}
+
+set_repeat() {
+  with_lock "$SETTINGS_LOCK" _set_repeat_unlocked "$@"
+}
+
+_set_shuffle_unlocked() {
+  local shuffle="${1-false}"
+  require_cmd jq
+
+  case "$shuffle" in
+    true|false) ;;
+    *)
+      die "Shuffle must be true or false."
+      ;;
+  esac
+
+  safe_read_json "$SETTINGS_FILE"
+
+  if [[ -f "$SETTINGS_FILE" ]]; then
+    jq --argjson s "$shuffle" '.shuffle = $s' "$SETTINGS_FILE" \
+      | json_write_raw "$SETTINGS_FILE"
+  else
+    jq -nc --argjson s "$shuffle" '{shuffle: $s}' \
+      | json_write_raw "$SETTINGS_FILE"
+  fi
+  cat "$SETTINGS_FILE"
+}
+
+set_shuffle() {
+  with_lock "$SETTINGS_LOCK" _set_shuffle_unlocked "$@"
+}

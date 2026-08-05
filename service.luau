@@ -13,6 +13,9 @@ local snapshot = {
   paused = false,
   provider = "youtube",
   sortBy = "date",
+  volume = 100,
+  ["repeat"] = "off",
+  shuffle = false,
   current = {
     id = "", title = "", url = "", uploader = "",
     duration = 0, speed = 1, pid = 0, error = "", endReason = "", updatedAt = "",
@@ -176,6 +179,15 @@ local function applySettingsJson(text)
   if type(settings.sortBy) == "string" then
     snapshot.sortBy = settings.sortBy
   end
+  if type(settings.volume) == "number" then
+    snapshot.volume = math.max(0, math.min(100, math.floor(settings.volume)))
+  end
+  if settings.repeatMode == "off" or settings.repeatMode == "all" or settings.repeatMode == "one" then
+    snapshot["repeat"] = settings.repeatMode
+  end
+  if type(settings.shuffle) == "boolean" then
+    snapshot.shuffle = settings.shuffle
+  end
 end
 
 local function persistQueueActive()
@@ -222,7 +234,9 @@ local function playEntry(entry, fromQueue, fromRadio)
     snapshot.busy.play = false
     local previous = snapshot.current or {}
     local state = applyStateJson(result.stdout)
-    if state and (snapshot.current or {}).id ~= "" and (snapshot.current or {}).id ~= previous.id then
+    local started = state ~= nil and (snapshot.current or {}).id ~= ""
+      and (snapshot.current or {}).id ~= previous.id
+    if started then
       pushHistory(previous)
     end
     if not fromRadio then
@@ -234,6 +248,13 @@ local function playEntry(entry, fromQueue, fromRadio)
       snapshot.lastError = lastErrorFrom(result, "errors.playback_failed")
     elseif not state then
       snapshot.lastError = noctalia.tr("errors.playback_failed")
+    elseif started and snapshot.playing then
+      local current = snapshot.current or {}
+      noctalia.notify(
+        current.title or "",
+        (current.uploader and current.uploader ~= "") and current.uploader
+          or noctalia.tr("queue.now_playing")
+      )
     end
     if fromQueue and queueState.pendingLaunch and snapshot.playing
       and snapshot.current.id == queueState.pendingLaunch.id then
@@ -241,10 +262,20 @@ local function playEntry(entry, fromQueue, fromRadio)
       local launched = queueState.pendingLaunch
       queueState.pendingLaunch = nil
       snapshot.lastNotice = noctalia.tr("queue.now_playing")
-      run({ "queue-remove", launched.id }, function(removed)
-        if removed.exitCode == 0 then applyQueueJson(removed.stdout) end
-        publish()
-      end)
+      if snapshot["repeat"] == "all" and launched.url and launched.url ~= "" then
+        run({
+          "queue-enqueue", launched.id, launched.title, launched.url,
+          launched.uploader, tostring(launched.duration or 0), "true",
+        }, function(recycled)
+          if recycled.exitCode == 0 then applyQueueJson(recycled.stdout) end
+          publish()
+        end)
+      else
+        run({ "queue-remove", launched.id }, function(removed)
+          if removed.exitCode == 0 then applyQueueJson(removed.stdout) end
+          publish()
+        end)
+      end
     elseif fromQueue then
       queueState.launching = false
       queueState.pendingLaunch = nil
@@ -293,6 +324,19 @@ local function handleEnded(state)
   if state.endReason ~= "finished" and state.endReason ~= "error" then return end
   if not state.updatedAt or state.updatedAt == queueState.lastHandledUpdate then return end
   queueState.lastHandledUpdate = state.updatedAt
+  local ended = snapshot.current or {}
+  if snapshot["repeat"] == "one" and state.endReason == "finished"
+    and ended.id ~= "" and ended.url ~= "" then
+    playEntry({
+      id = ended.id,
+      title = ended.title or "",
+      url = ended.url or "",
+      uploader = ended.uploader or "",
+      duration = ended.duration or 0,
+      thumbnail = ended.thumbnail or "",
+    }, false)
+    return
+  end
   if queueState.active then
     launchNextQueue()
     return
@@ -402,6 +446,68 @@ local function actionSpeed(value)
       snapshot.lastError = lastErrorFrom(result, "errors.speed_failed")
     end
     publish()
+  end)
+end
+
+local function actionVolume(value)
+  local volume = tonumber(value)
+  if not volume or volume ~= volume then volume = snapshot.volume or 100 end
+  volume = math.max(0, math.min(100, math.floor(volume)))
+  snapshot.busy.volume = true
+  publish()
+  run({ "set-volume", tostring(volume) }, function(result)
+    snapshot.busy.volume = false
+    if result.exitCode == 0 then
+      applySettingsJson(result.stdout)
+      setNotice("volume.set", { volume = tostring(volume) })
+    else
+      snapshot.lastError = lastErrorFrom(result, "errors.volume_failed")
+    end
+    publish()
+  end)
+end
+
+local function setRepeat(mode)
+  if mode ~= "off" and mode ~= "all" and mode ~= "one" then return end
+  snapshot.busy["repeat"] = true
+  publish()
+  run({ "set-repeat", mode }, function(result)
+    snapshot.busy["repeat"] = false
+    if result.exitCode == 0 then
+      applySettingsJson(result.stdout)
+      setNotice("repeat.set", { mode = noctalia.tr("repeat." .. mode) })
+    else
+      snapshot.lastError = lastErrorFrom(result, "errors.repeat_failed")
+    end
+    publish()
+  end)
+end
+
+local function setShuffle(value)
+  local shuffle = value == true or value == "true"
+  snapshot.busy.queue = true
+  snapshot.lastError = ""
+  publish()
+  run({ "set-shuffle", shuffle and "true" or "false" }, function(result)
+    if result.exitCode ~= 0 then
+      snapshot.busy.queue = false
+      snapshot.lastError = lastErrorFrom(result, "errors.queue_failed")
+      publish()
+      return
+    end
+    applySettingsJson(result.stdout)
+    if not shuffle then
+      snapshot.busy.queue = false
+      setNotice("shuffle.set", { state = noctalia.tr("shuffle." .. (shuffle and "on" or "off")) })
+      publish()
+      return
+    end
+    run({ "queue-shuffle" }, function(queueResult)
+      snapshot.busy.queue = false
+      if queueResult.exitCode == 0 then applyQueueJson(queueResult.stdout) end
+      setNotice("shuffle.set", { state = noctalia.tr("shuffle.on") })
+      publish()
+    end)
   end)
 end
 
@@ -858,6 +964,12 @@ local function dispatch(message)
     actionSeek(p.position)
   elseif action == "speed" then
     actionSpeed(p.value)
+  elseif action == "volume" then
+    actionVolume(p.value)
+  elseif action == "repeat" then
+    setRepeat(p.mode)
+  elseif action == "shuffle" then
+    setShuffle(p.value)
   elseif action == "save" then
     mutation({
       "save", p.entry.id or "", p.entry.title or "", p.entry.url or "",
@@ -921,7 +1033,7 @@ end
 function onIpc(event, payload)
   if event == "help" then
     noctalia.notify("Music Search IPC",
-      "help · status\nplay <url> · play_url <url>\nsave <url> · save_url <url>\ntoggle · pause · resume · stop\nseek <sec> · speed <x>\nnext · prev (history/radio)\nqueue_skip · queue_clear · queue_start\nplaylist_play <id> · import_folder <path>")
+      "help · status\nplay <url> · play_url <url>\nsave <url> · save_url <url>\ntoggle · pause · resume · stop\nseek <sec> · speed <x> · volume <0-100>\nrepeat <off|all|one> · shuffle <true|false>\nnext · prev (history/radio)\nqueue_skip · queue_clear · queue_start\nplaylist_play <id> · import_folder <path>")
     return
   end
   if not ready then return end
@@ -942,6 +1054,12 @@ function onIpc(event, payload)
     message.payload = { position = tonumber(payload) }
   elseif event == "speed" then
     message.payload = { value = tonumber(payload) }
+  elseif event == "volume" then
+    message.payload = { value = tonumber(payload) }
+  elseif event == "repeat" then
+    message.payload = { mode = payload }
+  elseif event == "shuffle" then
+    message.payload = { value = payload == "true" }
   elseif event == "save" and type(payload) == "table" then
     message.payload = { entry = payload }
   elseif type(payload) == "table" then

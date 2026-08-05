@@ -74,6 +74,9 @@ local function render()
   if current.speed and current.speed ~= 1 then
     lines[#lines + 1] = noctalia.tr("speed.current", { speed = tostring(current.speed) })
   end
+  if (snapshot.volume or 100) ~= 100 then
+    lines[#lines + 1] = noctalia.tr("volume.current", { volume = tostring(snapshot.volume) })
+  end
   lines[#lines + 1] = noctalia.tr("bar_widget.click_hint")
   barWidget.setTooltip(table.concat(lines, "\n"))
 end
