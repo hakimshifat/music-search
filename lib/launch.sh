@@ -8,6 +8,7 @@ launch_youtube_stream() {
   local -a mpv_cmd=(
     mpv
     --no-video
+    --vo=null
     --force-window=no
     --audio-display=no
     --ytdl-format=bestaudio[acodec=opus]/bestaudio/best/best
