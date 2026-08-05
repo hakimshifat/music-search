@@ -154,7 +154,7 @@ plain URL string or a JSON entry table (the string form matches the legacy v4
 ## Installing from this repository
 
 ```sh
-noctalia msg plugins source add music-search git <this-repo-url>
+noctalia msg plugins source add music-search git https://github.com/hakimshifat/music-search
 noctalia msg plugins enable kevichi7/music-search
 ```
 
