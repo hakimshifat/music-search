@@ -1,0 +1,16 @@
+# Standalone plugin catalog for the music-search source.
+# Kept in sync with music-search/plugin.toml (bump version/description here
+# when the manifest changes).
+
+[[plugin]]
+id = "kevichi7/music-search"
+name = "Music Search"
+version = "1.2.6"
+updated_at = 1785715200
+added_at = 1785715200
+author = "kevichi7"
+license = "MIT"
+icon = "music"
+description = "Search YouTube, SoundCloud, or local files and play audio in the background with mpv."
+plugin_api = 3
+tags = ["launcher", "bar", "service", "music", "audio", "utility"]
