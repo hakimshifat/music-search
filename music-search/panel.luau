@@ -17,17 +17,28 @@ local searchFailed = false
 local pendingSearchQuery = nil
 local lastCompletedQuery = ""
 local dragTarget = nil
-local volumeDrag = nil
+local dragUpdatedAt = nil
+local lastSeekAt = 0
+local WAVE_N = 28
+local wave = {}
 
-local repeatOrder = { "off", "all", "one" }
+for i = 1, WAVE_N do
+  wave[i] = 0.5
+end
 
-local function nextRepeatMode(mode)
-  for i, m in ipairs(repeatOrder) do
-    if m == mode then
-      return repeatOrder[(i % #repeatOrder) + 1]
-    end
+local function buildWave()
+  local active = (snapshot or {}).playing == true
+  local t = os.clock() * 2.4
+  local squash = active and 1 or 0.12
+  local center = (WAVE_N - 1) / 2
+  for i = 1, WAVE_N do
+    local d = (i - 1) - center
+    local env = math.max(0, 1 - math.abs(d) / center)
+    env = env ^ 1.3
+    local pulse = 0.55 + 0.45 * math.sin(t + i * 0.9)
+    local v = env * pulse * squash
+    wave[i] = math.max(0.04, math.min(1, v))
   end
-  return "all"
 end
 
 local trCache = {}
@@ -158,11 +169,14 @@ render = function()
   local paused = (snapshot or {}).paused == true
   local title = current.title or ""
   local query = trim(searchQuery)
+  if type(panel.setNeedsFrameTick) == "function" then
+    panel.setNeedsFrameTick(playing and not paused and query == "")
+  end
 
   local header = ui.row({ gap = 8, align = "center" }, {
     ui.glyph({ name = "music", size = 16 }),
     ui.label({
-      text = title ~= "" and title or tr("panel.no_track"),
+      text = tr("panel.title"),
       flexGrow = 1,
       maxLines = 1,
     }),
@@ -201,88 +215,97 @@ render = function()
     end
     children[#children + 1] = ui.scroll({ key = "results", flexGrow = 1, gap = 2 }, rows)
   else
-    if thumbPath then
-      children[#children + 1] = ui.image({
-        path = thumbPath,
-        width = 256,
-        height = 144,
-        fit = "cover",
-        radius = 12,
-      })
-    end
     if playing or title ~= "" then
       local pos = math.max(0, math.floor(tonumber((position or {}).position) or 0))
       local duration = math.max(0, math.floor(tonumber(current.duration) or 0))
       local sliderValue = dragTarget or pos
-      children[#children + 1] = ui.row({ gap = 8, align = "center" }, {
-        ui.label({ text = formatDuration(sliderValue), width = 44 }),
-        ui.slider({
-          min = 0,
-          max = math.max(1, duration),
-          step = 1,
-          value = sliderValue,
-          flexGrow = 1,
-          onChange = function(value)
-            dragTarget = tonumber(value) or 0
-          end,
-          onDragEnd = function()
-            local target = dragTarget or pos
-            dragTarget = nil
-            dispatch({ action = "seek", position = target })
-          end,
+      local artist = trim(current.uploader or "")
+      local media = {
+        ui.row({ key = "now-head", align = "center", justify = "space-between" }, {
+          ui.label({ text = tr("panel.now_playing"), color = "primary", fontSize = 12 }),
+          ui.glyph({ name = "headphones", size = 14, color = "on_surface_variant" }),
         }),
-        ui.label({ text = formatDuration(duration), width = 44 }),
+      }
+      if thumbPath then
+        media[#media + 1] = ui.image({ key = "art", path = thumbPath, width = 210, height = 210, fit = "cover", radius = 12 })
+      else
+        media[#media + 1] = ui.column({ key = "art", width = 210, height = 210, radius = 12, align = "center", justify = "center" }, {
+          ui.glyph({ name = "music", size = 44, color = "on_surface_variant" }),
+        })
+      end
+      media[#media + 1] = ui.label({
+        text = title,
+        fontWeight = "bold",
+        color = "#DDB067",
+        fontSize = 16,
+        maxLines = 1,
+        textAlign = "center",
+        maxWidth = 500,
       })
-      children[#children + 1] = ui.row({ gap = 8, align = "center" }, {
-        ui.button({ glyph = "media-prev", tooltip = tr("panel.prev_track"), onClick = function()
+      if artist ~= "" then
+        media[#media + 1] = ui.label({
+          text = artist,
+          color = "on_surface_variant",
+          fontSize = 13,
+          maxLines = 1,
+          textAlign = "center",
+          maxWidth = 500,
+        })
+      end
+      media[#media + 1] = ui.row({ gap = 12, align = "center" }, {
+          ui.label({ text = formatDuration(sliderValue), width = 44 }),
+          ui.slider({
+            min = 0,
+            max = math.max(1, duration),
+            step = 1,
+            value = sliderValue,
+            flexGrow = 1,
+            onChange = function(value)
+              dragTarget = tonumber(value) or 0
+              dragUpdatedAt = noctalia.nowMs()
+              local now = noctalia.nowMs()
+              if now - lastSeekAt >= 150 then
+                lastSeekAt = now
+                dispatch({ action = "seek", position = dragTarget })
+              end
+            end,
+            onDragEnd = function()
+              local target = dragTarget or pos
+              dragTarget = nil
+              dragUpdatedAt = nil
+              dispatch({ action = "seek", position = target })
+            end,
+          }),
+          ui.label({ text = formatDuration(duration), width = 44 }),
+        })
+      media[#media + 1] = ui.row({ gap = 12, align = "center" }, {
+        ui.button({ glyph = "media-prev", variant = "ghost", width = 40, height = 40, glyphSize = 18, tooltip = tr("panel.prev_track"), onClick = function()
           dispatch({ action = "prev" })
         end }),
-        ui.button({ glyph = paused and "player-play-filled" or "player-pause-filled", tooltip = tr("panel.toggle_play"), onClick = function()
+        ui.button({ glyph = paused and "player-pause-filled" or "player-play-filled", variant = "primary", width = 48, height = 48, glyphSize = 22, tooltip = tr("panel.toggle_play"), onClick = function()
           dispatch({ action = "toggle" })
         end }),
-        ui.button({ glyph = "media-next", tooltip = tr("panel.next_track"), onClick = function()
+        ui.button({ glyph = "media-next", variant = "ghost", width = 40, height = 40, glyphSize = 18, tooltip = tr("panel.next_track"), onClick = function()
           dispatch({ action = "next" })
         end }),
-        ui.button({
-          glyph = (snapshot or {})["repeat"] == "one" and "repeat-one" or "repeat",
-          tooltip = tr("panel.repeat", { mode = tr("repeat." .. ((snapshot or {})["repeat"] or "off")) }),
-          onClick = function()
-            dispatch({ action = "repeat", payload = { mode = nextRepeatMode((snapshot or {})["repeat"] or "off") } })
-          end,
-        }),
-        ui.button({
-          glyph = "shuffle",
-          tooltip = tr("panel.shuffle", { state = (snapshot or {}).shuffle == true and tr("shuffle.on") or tr("shuffle.off") }),
-          onClick = function()
-            dispatch({ action = "shuffle", payload = { value = not ((snapshot or {}).shuffle == true) } })
-          end,
-        }),
       })
-      local volume = math.max(0, math.min(100, math.floor(tonumber((snapshot or {}).volume) or 100)))
-      local volumeDraw = volumeDrag or volume
-      children[#children + 1] = ui.row({ gap = 8, align = "center" }, {
-        ui.button({ glyph = volume == 0 and "volume-off" or "volume-up", tooltip = tr("panel.mute"), onClick = function()
-          dispatch({ action = "volume", payload = { value = volume > 0 and 0 or 100 } })
-        end }),
-        ui.slider({
-          min = 0,
-          max = 100,
-          step = 1,
-          value = volumeDraw,
-          flexGrow = 1,
-          onChange = function(value)
-            volumeDrag = tonumber(value) or 0
-          end,
-          onDragEnd = function()
-            local target = volumeDrag or volume
-            volumeDrag = nil
-            dispatch({ action = "volume", payload = { value = math.max(0, math.min(100, math.floor(target))) } })
-          end,
-        }),
-        ui.label({ text = tostring(volumeDraw) .. "%", width = 36 }),
+      buildWave()
+      local bars = {}
+      for i = 1, WAVE_N do
+        local amp = wave[i]
+        bars[#bars + 1] = ui.row({ key = "bar-" .. i, width = 156, height = 12, align = "center", justify = "center" }, {
+          ui.box({ width = math.max(2, math.floor(amp * 150)), height = 12, fill = "#98C39E", radius = 6 }),
+        })
+      end
+      children[#children + 1] = ui.row({ flexGrow = 1, gap = 12, align = "center" }, {
+        ui.column({ flexGrow = 1, radius = 16, padding = 12, gap = 10, fill = "#1E1C1ACC", border = "outline", borderWidth = 1, align = "center" }, media),
+        ui.column({ key = "vizcard", width = 180, radius = 16, padding = 12, gap = 2, fill = "#1E1C1ACC", border = "outline", borderWidth = 1, align = "center", justify = "center" }, bars),
       })
     else
-      children[#children + 1] = ui.label({ text = tr("panel.no_track") })
+      children[#children + 1] = ui.column({ align = "center", flexGrow = 1, gap = 12 }, {
+        ui.glyph({ name = "music", size = 56 }),
+        ui.label({ text = tr("panel.no_track"), color = "on_surface_variant", fontSize = 14 }),
+      })
     end
   end
 
@@ -307,6 +330,39 @@ render = function()
   }))
 end
 
+local function readState()
+  snapshot = noctalia.state.get("music_snapshot")
+  position = noctalia.state.get("music_position")
+  local current = (snapshot or {}).current or {}
+  ensureThumbnail(current.id or "", current.thumbnail or "")
+end
+
+local function resolveStaleDrag()
+  if dragTarget ~= nil and dragUpdatedAt ~= nil and noctalia.nowMs() - dragUpdatedAt > 1500 then
+    local target = dragTarget
+    dragTarget = nil
+    dragUpdatedAt = nil
+    dispatch({ action = "seek", position = target })
+  end
+end
+
+function onOpen(context)
+  readState()
+  resolveStaleDrag()
+  render()
+end
+
+function update()
+  readState()
+  resolveStaleDrag()
+  render()
+end
+
+function onFrameTick(deltaMs)
+  if not (snapshot or {}).playing or (snapshot or {}).paused then return end
+  render()
+end
+
 noctalia.state.watch("music_snapshot", function(value)
   snapshot = value
   local current = (snapshot or {}).current or {}
@@ -326,3 +382,4 @@ noctalia.runAsync("mkdir -p " .. shellQuote(CACHE_DIR), function()
 end)
 
 render()
+panel.setWantsSecondTicks(true)

@@ -90,6 +90,7 @@ _play_track_state_phase() {
       mpv_args=(
         mpv
         --no-video
+        --vo=null
         --force-window=no
         --audio-display=no
         --demuxer-max-bytes=256K
@@ -160,6 +161,7 @@ _play_track_state_phase() {
     mpv_args=(
       mpv
       --no-video
+      --vo=null
       --force-window=no
       --audio-display=no
       --ytdl-format="bestaudio[acodec=opus]/bestaudio/best/best"

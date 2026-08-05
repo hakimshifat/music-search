@@ -467,50 +467,6 @@ local function actionVolume(value)
   end)
 end
 
-local function setRepeat(mode)
-  if mode ~= "off" and mode ~= "all" and mode ~= "one" then return end
-  snapshot.busy["repeat"] = true
-  publish()
-  run({ "set-repeat", mode }, function(result)
-    snapshot.busy["repeat"] = false
-    if result.exitCode == 0 then
-      applySettingsJson(result.stdout)
-      setNotice("repeat.set", { mode = noctalia.tr("repeat." .. mode) })
-    else
-      snapshot.lastError = lastErrorFrom(result, "errors.repeat_failed")
-    end
-    publish()
-  end)
-end
-
-local function setShuffle(value)
-  local shuffle = value == true or value == "true"
-  snapshot.busy.queue = true
-  snapshot.lastError = ""
-  publish()
-  run({ "set-shuffle", shuffle and "true" or "false" }, function(result)
-    if result.exitCode ~= 0 then
-      snapshot.busy.queue = false
-      snapshot.lastError = lastErrorFrom(result, "errors.queue_failed")
-      publish()
-      return
-    end
-    applySettingsJson(result.stdout)
-    if not shuffle then
-      snapshot.busy.queue = false
-      setNotice("shuffle.set", { state = noctalia.tr("shuffle." .. (shuffle and "on" or "off")) })
-      publish()
-      return
-    end
-    run({ "queue-shuffle" }, function(queueResult)
-      snapshot.busy.queue = false
-      if queueResult.exitCode == 0 then applyQueueJson(queueResult.stdout) end
-      setNotice("shuffle.set", { state = noctalia.tr("shuffle.on") })
-      publish()
-    end)
-  end)
-end
-
 local function mutation(args, busyKey, errorKey, noticeKey, noticeArgs, dataKind)
   snapshot.busy[busyKey] = true
   snapshot.lastError = ""
@@ -966,10 +922,6 @@ local function dispatch(message)
     actionSpeed(p.value)
   elseif action == "volume" then
     actionVolume(p.value)
-  elseif action == "repeat" then
-    setRepeat(p.mode)
-  elseif action == "shuffle" then
-    setShuffle(p.value)
   elseif action == "save" then
     mutation({
       "save", p.entry.id or "", p.entry.title or "", p.entry.url or "",
@@ -1033,7 +985,7 @@ end
 function onIpc(event, payload)
   if event == "help" then
     noctalia.notify("Music Search IPC",
-      "help · status\nplay <url> · play_url <url>\nsave <url> · save_url <url>\ntoggle · pause · resume · stop\nseek <sec> · speed <x> · volume <0-100>\nrepeat <off|all|one> · shuffle <true|false>\nnext · prev (history/radio)\nqueue_skip · queue_clear · queue_start\nplaylist_play <id> · import_folder <path>")
+      "help · status\nplay <url> · play_url <url>\nsave <url> · save_url <url>\ntoggle · pause · resume · stop\nseek <sec> · speed <x> · volume <0-100>\nnext · prev (history/radio)\nqueue_skip · queue_clear · queue_start\nplaylist_play <id> · import_folder <path>")
     return
   end
   if not ready then return end
@@ -1056,10 +1008,6 @@ function onIpc(event, payload)
     message.payload = { value = tonumber(payload) }
   elseif event == "volume" then
     message.payload = { value = tonumber(payload) }
-  elseif event == "repeat" then
-    message.payload = { mode = payload }
-  elseif event == "shuffle" then
-    message.payload = { value = payload == "true" }
   elseif event == "save" and type(payload) == "table" then
     message.payload = { entry = payload }
   elseif type(payload) == "table" then

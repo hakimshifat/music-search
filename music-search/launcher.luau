@@ -626,12 +626,6 @@ local function addUrlRows(rows, query)
   end)
 end
 
-local function nextRepeatMode(mode)
-  if mode == "off" then return "all" end
-  if mode == "all" then return "one" end
-  return "off"
-end
-
 local function addQueueRows(rows)
   statusRow(rows)
   local queueActive = (snapshot or {}).queueActive == true
@@ -661,15 +655,6 @@ local function addQueueRows(rows)
   addRow(rows, tr("queue.clear"), tr("queue.clear_empty"), "playlist-remove", S.quick, function()
     dispatch({ action = "queue_clear" })
   end)
-  local repeatMode = (snapshot or {})["repeat"] or "off"
-  addRow(rows, tr("queue.repeat"), tr("queue.repeat_hint"), "repeat", S.quick, function()
-    dispatch({ action = "repeat", payload = { mode = nextRepeatMode(repeatMode) } })
-  end)
-  local shuffleOn = (snapshot or {}).shuffle == true
-  addRow(rows, tr("queue.shuffle", { state = shuffleOn and tr("shuffle.on") or tr("shuffle.off") }),
-    tr("queue.shuffle_hint"), "shuffle", S.quick, function()
-      dispatch({ action = "shuffle", payload = { value = not shuffleOn } })
-    end)
   local queue = (snapshot or {}).queue or {}
   if #queue == 0 then
     addRow(rows, tr("queue.empty"), tr("queue.empty_desc"), "bell", S.header)

@@ -68,7 +68,7 @@ launch_youtube_cached() {
     fi
     mpris_flag=""
     [[ -n "$8" ]] && mpris_flag="--script=$8"
-    exec mpv --no-video --force-window=no --audio-display=no --demuxer-max-bytes=256K --speed="$6" --volume="$7" --log-file="$4" --input-ipc-server="$3" --title="Noctalia music-search" $mpris_flag "${files[0]}"
+    exec mpv --no-video --vo=null --force-window=no --audio-display=no --demuxer-max-bytes=256K --speed="$6" --volume="$7" --log-file="$4" --input-ipc-server="$3" --title="Noctalia music-search" $mpris_flag "${files[0]}"
   ' _ "$source_url" "$DOWNLOAD_BASENAME" "$SOCKET_FILE" "$LOG_FILE" "$extractor_arg" "$speed" "$(current_volume)" "$mp" >/dev/null 2>&1 &
 }
 

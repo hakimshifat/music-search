@@ -45,8 +45,7 @@
     "queue_action_failed": "music-search queue action failed.",
     "mp3_save_failed": "music-search mp3 save command failed.",
     "folder_import_failed": "music-search folder import command failed.",
-    "volume_failed": "music-search volume command failed.",
-    "repeat_failed": "music-search repeat command failed."
+    "volume_failed": "music-search volume command failed."
   },
   "home": {
     "recently_played": "Recently played",
@@ -138,8 +137,7 @@
     "prev_track": "Previous track",
     "toggle_play": "Play / pause",
     "next_track": "Next track (or related song)",
-    "repeat": "Repeat: {mode}",
-    "shuffle": "Shuffle: {state}",
+    "now_playing": "Now Playing",
     "volume": "Volume: {volume}%",
     "mute": "Mute / unmute"
   },
@@ -216,11 +214,7 @@
     "loading_shuffled_saved": "Loading saved tracks (shuffle)...",
     "now_playing": "Now playing",
     "error_exhausted": "Queue exhausted",
-    "finished": "Playback finished",
-    "repeat": "Repeat: {mode}",
-    "repeat_hint": "Repeat off, all, or one",
-    "shuffle": "Shuffle: {state}",
-    "shuffle_hint": "Shuffle the current queue"
+    "finished": "Playback finished"
   },
   "radio": {
     "loading": "Loading related tracks...",
@@ -228,17 +222,6 @@
     "no_track": "Nothing playing — play something first",
     "no_prev": "No previous track",
     "ended": "End of related tracks"
-  },
-  "repeat": {
-    "off": "Off",
-    "all": "All",
-    "one": "One",
-    "set": "Repeat: {mode}"
-  },
-  "shuffle": {
-    "on": "On",
-    "off": "Off",
-    "set": "Shuffle: {state}"
   },
   "volume": {
     "set": "Volume set to {volume}%",

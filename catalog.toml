@@ -5,12 +5,20 @@
 [[plugin]]
 id = "kevichi7/music-search"
 name = "Music Search"
-version = "1.2.7"
-updated_at = 1785952864
+version = "1.2.8"
+updated_at = 1785962219
 added_at = 1785715200
 author = "kevichi7"
 license = "MIT"
 icon = "music"
 description = "Search YouTube, SoundCloud, or local files and play audio in the background with mpv."
-plugin_api = 3
+plugin_api = 18
 tags = ["launcher", "bar", "service", "music", "audio", "utility"]
+
+# Keep a build for Noctalia shells older than plugin_api 18 (panel second ticks).
+# It cannot run the self-refreshing player panel, but stays installable/playable.
+[[plugin.release]]
+plugin_api = 3
+version = "1.2.7"
+updated_at = 1785952864
+rev = "7d97de62c141d84f61ed5a45aa517e98016a14fb"
